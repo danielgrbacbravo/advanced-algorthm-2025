@@ -70,6 +70,10 @@ int main(void) {
       chosen_exam = exam_scores[exam_idx];
       chosen_midterm = midterm_scores[midterm_idx];
 
+      if(chosen_midterm * chosen_assignment > target_final_grade || chosen_exam * chosen_assignment > target_final_grade){
+          break;
+      }
+
       double computed_grade =
           (chosen_exam + chosen_midterm) *
               (chosen_exam + chosen_midterm + chosen_assignment) -
