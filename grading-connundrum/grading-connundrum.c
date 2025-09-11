@@ -5,14 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Comparison function for doubles
-int compare_doubles(const void *a, const void *b) {
+static inline int compare_doubles(const void *a, const void *b) {
   double x = *(const double *)a;
   double y = *(const double *)b;
   return (x > y) - (x < y); // 1 if x>y, -1 if x<y, 0 if equal
 }
 
-// Function to sort an array of doubles in ascending order
 void sort_doubles(double *arr, size_t n) {
   qsort(arr, n, sizeof(double), compare_doubles);
 }
@@ -21,8 +19,18 @@ double *read_double_array(int length) {
   double *arr = malloc(length * sizeof(double));
   if (!arr)
     return NULL;
-  for (int i = 0; i < length; ++i) {
-    scanf("%lf", &arr[i]);
+
+  // Read all doubles in a single line for faster input
+  for (int i = 0; i < length;) {
+    int read = scanf("%lf", &arr[i]);
+    if (read == 1) {
+      ++i;
+    } else {
+      // Skip invalid input
+      int c;
+      while ((c = getchar()) != EOF && c != '\n')
+        ;
+    }
   }
   return arr;
 }
@@ -43,7 +51,7 @@ int main(void) {
   // exam^2 + exam*assignment + midterm^2 + midterm*assignment ==
   // target_final_grade can simplify to ( reduces multiplication ops)
   //(exam + midterm)(exam + midterm + assignment) - 3*exam*midterm ==
-  //target_final_grade
+  // target_final_grade
 
   double chosen_exam = 0;
   double chosen_midterm = 0;
@@ -53,10 +61,9 @@ int main(void) {
 
   for (int assignment_idx = 0; assignment_idx < num_grades; assignment_idx++) {
 
+    chosen_assignment = assignment_scores[assignment_idx];
     int exam_idx = 0;
     int midterm_idx = num_grades - 1;
-
-    chosen_assignment = assignment_scores[assignment_idx];
 
     while (exam_idx < num_grades && midterm_idx >= 0) {
 
@@ -75,7 +82,7 @@ int main(void) {
 
       if (computed_grade < target_final_grade) {
         exam_idx++;
-      } else if (computed_grade > target_final_grade) {
+      } else {
         midterm_idx--;
       }
     }
