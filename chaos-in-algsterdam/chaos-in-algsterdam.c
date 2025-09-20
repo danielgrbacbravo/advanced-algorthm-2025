@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,7 +87,7 @@ static inline int read_license_from_input(License *license) {
   // newline
   int start_day, start_month, start_year;
   int end_day, end_month, end_year;
-  if (scanf("%d.%d.%d %d.%d.%d ", &start_day, &start_month, &start_year,
+  if (scanf("%d.%d.%d %d.%d.%d", &start_day, &start_month, &start_year,
             &end_day, &end_month, &end_year) != 6) {
     return 0; // failed
   }
@@ -95,6 +96,16 @@ static inline int read_license_from_input(License *license) {
       calculate_days_since_2000(start_day, start_month, start_year);
   license->end_day_count =
       calculate_days_since_2000(end_day, end_month, end_year);
+
+  // Consume leftover whitespace/newline before reading company name
+  int c;
+  while ((c = getchar()) != EOF && c != '\n' && isspace(c)) {
+  }
+
+  // If we consumed a non-newline, put it back
+  if (c != '\n' && c != EOF) {
+    ungetc(c, stdin);
+  }
 
   // Read the rest of the line (company name can contain spaces)
   if (fgets(license->company_name, sizeof(license->company_name), stdin) ==
@@ -107,6 +118,12 @@ static inline int read_license_from_input(License *license) {
   if (company_name_length > 0 &&
       license->company_name[company_name_length - 1] == '\n') {
     license->company_name[company_name_length - 1] = '\0';
+  }
+  // Trim trailing whitespace
+  size_t len = strlen(license->company_name);
+  while (len > 0 && isspace((unsigned char)license->company_name[len - 1])) {
+    license->company_name[len - 1] = '\0';
+    len--;
   }
 
   return 1;
@@ -140,12 +157,23 @@ int find_busiest_license_day(LicenseEvent *event_list, int event_count) {
   int busiest_day_count = -1;
   int current_active_license_count = 0;
   int max_active_license_count = 0;
+  int prev_day = -1;
+
   for (int event_index = 0; event_index < event_count; event_index++) {
-    current_active_license_count += event_list[event_index].event_type;
-    if (current_active_license_count > max_active_license_count) {
-      max_active_license_count = current_active_license_count;
-      busiest_day_count = event_list[event_index].day_count;
+    int day = event_list[event_index].day_count;
+    if (day != prev_day && prev_day != -1) {
+      if (current_active_license_count > max_active_license_count) {
+        max_active_license_count = current_active_license_count;
+        busiest_day_count = prev_day;
+      }
     }
+    current_active_license_count += event_list[event_index].event_type;
+    prev_day = day;
+  }
+  // Check last day
+  if (current_active_license_count > max_active_license_count) {
+    max_active_license_count = current_active_license_count;
+    busiest_day_count = prev_day;
   }
   return busiest_day_count;
 }
