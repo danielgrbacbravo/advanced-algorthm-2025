@@ -192,7 +192,6 @@ void print_companies_with_active_licenses_on_day(int busiest_day_count,
 int main() {
   int license_count;
   scanf("%d\n", &license_count); // read number of licenses
-  // fprintf(stderr, "Debug: license_count = %d\n", license_count);
 
   License *license_list = malloc(sizeof(License) * license_count);
   if (!license_list) {
@@ -205,25 +204,16 @@ int main() {
       fprintf(stderr, "Failed to read license %d\n", license_index + 1);
       return 1;
     }
-    // fprintf(stderr, "Debug: License %d: %d-%d (%s)\n", license_index,
-    //         license_list[license_index].start_day_count,
-    //         license_list[license_index].end_day_count,
-    //         license_list[license_index].company_name);
   }
 
   LicenseEvent *event_list =
       create_license_event_list(license_list, license_count);
-  // fprintf(stderr, "Debug: event_list allocated at %p\n", (void *)event_list);
   qsort(event_list, license_count * 2, sizeof(LicenseEvent),
         compare_events_by_earliest_day);
   int busiest_day_count =
       find_busiest_license_day(event_list, license_count * 2);
-  // fprintf(stderr, "Debug: busiest_day_count = %d\n", busiest_day_count);
   CalendarDate busiest_calendar_date =
       get_calendar_date_from_days_since_2000(busiest_day_count);
-  // fprintf(stderr, "Debug: busiest_calendar_date = %02d.%02d.%04d\n",
-  //         busiest_calendar_date.day, busiest_calendar_date.month,
-  //         busiest_calendar_date.year);
   printf("Busiest day: %02d.%02d.%04d\n", busiest_calendar_date.day,
          busiest_calendar_date.month, busiest_calendar_date.year);
   print_companies_with_active_licenses_on_day(busiest_day_count, license_list,
