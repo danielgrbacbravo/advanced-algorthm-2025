@@ -21,7 +21,7 @@ int binary_search(int *indices_array, int array_size, int *values_array,
   int left_boundary = 0, right_boundary = array_size - 1;
   while (left_boundary <= right_boundary) {
     int middle_index = (left_boundary + right_boundary) / 2;
-    if (values_array[indices_array[middle_index]] >= target_value)
+    if (values_array[indices_array[middle_index]] > target_value)
       right_boundary = middle_index - 1;
     else
       left_boundary = middle_index + 1;
